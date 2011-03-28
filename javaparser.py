@@ -1,5 +1,8 @@
 #!/usr/bin/python
 
+# by Albert Zeyer, www.az2000.de
+# code under GPLv3+
+
 TABWIDTH = 4
 
 class JavaParser:
