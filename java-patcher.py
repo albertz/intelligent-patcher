@@ -12,14 +12,15 @@ infilename = len(sys.argv) > 1 and sys.argv[1] or "-"
 if infilename == "-": infile = sys.stdin
 else: infile = codecs.open(infilename, "r", "utf-8")
 
-PrintIdentifiers = True
-
 lastNamespace = []
 
 def handler(p):
+	if p.lastChar != None: sys.stdout.write(p.lastChar.encode("utf-8"))
 	global lastNamespace
 	if len(lastNamespace) < len(p.namespace):
-		if PrintIdentifiers and not None in p.namespace and set(p.openingTypes) == set("{"): print ".".join(p.namespace)
+		if not None in p.namespace and set(p.openingTypes) == set("{"):
+			if p.namespace == ["Applet"]:
+				sys.stdout.write("\n\n" + p.curScopeIndent + "FOOOO")
 	lastNamespace = list(p.namespace)
 
 parser = JavaParser()
