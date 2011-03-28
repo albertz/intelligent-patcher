@@ -19,7 +19,8 @@ def handler(p):
 	global lastNamespace
 	if len(lastNamespace) < len(p.namespace):
 		if not None in p.namespace and set(p.openingTypes) == set("{"):
-			if p.namespace == ["Applet"]:
+			namespaceStr = ".".join(p.namespace)
+			if namespaceStr == "Applet":
 				sys.stdout.write("\n\n" + p.curScopeIndent + "FOOOO")
 	lastNamespace = list(p.namespace)
 
