@@ -6,11 +6,38 @@
 import sys
 import codecs # utf8
 from javaparser import JavaParser
+from StringIO import StringIO
 
 infile = sys.stdin
-infilename = len(sys.argv) > 1 and sys.argv[1] or "-"
-if infilename == "-": infile = sys.stdin
-else: infile = codecs.open(infilename, "r", "utf-8")
+callbacks_newNamespace = {}
+infilename = None
+inplace = False
+
+i = 1
+while i < len(sys.argv):
+	arg = sys.argv[i]
+	if len(arg) > 1 and arg[0] == "-": # an option
+		if arg == "-insertin":
+			i += 1
+			namespace = sys.argv[i]
+			i += 1
+			replacefile = sys.argv[i]
+			if namespace not in callbacks_newNamespace: callbacks_newNamespace[namespace] = []
+			def func(p):
+				sys.stdout.write("\n")
+				for l in open(replacefile):
+					sys.stdout.write("\n" + p.curScopeIndent + l.strip("\n"))
+			callbacks_newNamespace[namespace].append(func)
+		elif arg == "-inplace":
+			sys.stdout = StringIO()
+			inplace = True
+		else:
+			raise Exception, "arg option " + arg + " unknown"
+	else:
+		infilename = arg
+	i += 1
+
+if infilename != "-" and infilename != None: infile = codecs.open(infilename, "r", "utf-8")
 
 lastNamespace = []
 
@@ -20,10 +47,15 @@ def handler(p):
 	if len(lastNamespace) < len(p.namespace):
 		if not None in p.namespace and set(p.openingTypes) == set("{"):
 			namespaceStr = ".".join(p.namespace)
-			if namespaceStr == "Applet":
-				sys.stdout.write("\n\n" + p.curScopeIndent + "FOOOO")
+			if namespaceStr in callbacks_newNamespace:
+				for func in callbacks_newNamespace[namespaceStr]: func(p)
 	lastNamespace = list(p.namespace)
 
 parser = JavaParser()
 parser.readStream(infile, handler)
 
+if inplace:
+	infile.close()
+	infile = open(infilename, "w")
+	infile.write(sys.stdout.getvalue())
+	infile.close()

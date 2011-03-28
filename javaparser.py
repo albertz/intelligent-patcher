@@ -3,6 +3,8 @@
 # by Albert Zeyer, www.az2000.de
 # code under GPLv3+
 
+import sys
+
 class JavaParser:
 	TagWords = ["public","private","protected","final","static"]
 	
