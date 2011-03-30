@@ -56,7 +56,7 @@ class JavaParser:
 			return
 		if self.inMultilineComment or self.inSimpleComment: return
 		
-		inQuotes = len(self.openingTypes) > 0 and self.openingTypes[-1] == "\""
+		inQuotes = len(self.openingTypes) > 0 and self.openingTypes[-1] in "\"'"
 		
 		if not inQuotes:
 			if char.lower() in "abcdefghijklmnopqrstuvwxyz0123456789":
@@ -72,10 +72,11 @@ class JavaParser:
 				self.inMultilineComment = True
 				return
 		
-		if char == "\"":
-			if inQuotes: self.openingTypes.pop()
-			else: self.openingTypes.append("\"")
+		if not inQuotes and char in "\"'":
+			self.openingTypes.append(char)
 			return
+		if inQuotes and char == self.openingTypes[-1]:
+			self.openingTypes.pop()
 		if inQuotes:
 			if char == "\\": self.ignoreNext = True
 			return		
